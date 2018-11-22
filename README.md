@@ -7,22 +7,22 @@ multi-platform server executable. Ruse can be rapidly deployed from the
 command-line or inside a Docker container for even more security.
 
 ## Features
- * Runs under Linux \*BSD, MacOS, and Windows (Win7, Server 2008R2 and later)
+ * Runs under Linux, \*BSD, MacOS, and Windows (Win7, Server 2008R2 and later)
  * No external dependencies
  * HTTP and HTTPS (SSL/TLS) support
  * Selective Reverse Proxying
- * Serve static files (with optional directory listing)
+ * Serves static files (with optional directory listing)
  * File Logging
  
 ## Why
 Ruse helps you overcome multiple challenges, such as:
  * Hiding your HTTP listener(s) from Incident Response teams.
  * Load-balance to multiple remote listeners.
- * Simultaneously serving static files and listening for reverse HTTP shellcode on a single port.
- * Leveraging domain-fronting by only exposing the redirector to the world.
+ * Simultaneously serving static files and listening for reverse HTTP shellcodes on a single port.
+ * Leveraging domain-fronting by exposing the redirector from a trusted location.
 
 If you're doing Red Team operations or you may simply want to hide your HTTP
-listener during an engagement, Ruse may be of help.
+listeners during an engagement, Ruse may be of help.
 
 In fact, you may want incident response teams or your targets' operators not to
 directly contact your C2 or metasploit HTTP listener for various reasons, such
@@ -40,15 +40,18 @@ building: bin/amd64/ruse
 Ruse can run unprivileged from a terminal:
 ```
 $ bin/amd64/ruse -c conf/ruse.conf
-Starting HTTP Server on 0.0.0.0:8000
+Starting HTTP Server on localhost:8000
 ```
-By default Ruse is configured to listen on port tcp/8000 and only accept
-plain-text HTTP connections from clients. It's also configured to proxy traffic
-from metasploit's reverse HTTP payloads by matching their User-Agent header
-fields.
+By default Ruse ships with an example configuration file which only allows
+plain-text HTTP connections from localhost on port tcp/8000. It's also
+configured to proxy traffic from metasploit's reverse HTTP payloads by matching
+their User-Agent header fields.
 
 ## Building and running under Docker:
-Ruse can also run under a Docker container, and thus in a matter of seconds:
+Ruse can also run under a Docker container, and thus in a matter of seconds.
+Enter the `make container` command to build the Docker image and to push it to
+your local registry. Once the image has been created, simply start a new
+container like demonstrated in the below example:
 ```
 $ make container
 building: bin/amd64/ruse
@@ -83,37 +86,37 @@ Starting HTTP Server on 0.0.0.0:8000
 
 ## Configuring
 To configure the redirector, copy and edit the [ruse.conf](conf/ruse.conf)
-configuration file inside the `/conf` directory to `/etc/ruse.conf`. The latter
-is the default configuration file path, and can be manually changed using the
+configuration file in the `/conf` directory to `/etc/ruse.conf`. The latter is
+the default configuration file path, and can be manually changed using the
 command-line switch `-c`.
 
 The configuration file is in JSON format, and accepts various configuration
 options, please see the tables below for further reference:
 
-configuration attributes
-------------------------
-| Attribute Name | Required | Default value | Supported value / description      |
-|----------------|----------|---------------|------------------------------------|
-| Hostname       | Yes      | 0.0.0.0       | hostname or IP address             |
-| Protocols      | Yes      | plain         | plain, tls                         |
-| Port           | Yes      | 8000          | 0-65535                            |
-| TLSPort        | No       | 8443          | 0-65535                            |
-| TLSKey         | No       | server.key    | PEM private key                    |
-| TLSCert        | No       | server.crt    | PEM X.509 certificate              |
-| Root           | No       | /var/www      | static content root directory      |
-| Index          | No       | index.htm     | directory index file               |
-| Verbose        | Yes      | 2             | 0(off), 1(low), 2(medium), 3(high) |
-| Logfile        | No       |               | readable and writable log file     |
-| Proxy          | No       | msf default   | See proxy sub-attributes table     |
+configuration file - main attributes
+------------------------------------
+| Attribute Name | Type     | Default value | Supported value(s) / Description        |
+|----------------|----------|---------------|-----------------------------------------|
+| Hostname       | optional | localhost     | hostname or IPv4 address                |
+| Protocols      | optional | plain         | plain, tls                              |
+| Port           | optional | 8000          | 0-65535                                 |
+| TLSPort        | optional | 8443          | 0-65535                                 |
+| TLSKey         | optional | server.key    | PEM private key                         |
+| TLSCert        | optional | server.crt    | PEM X.509 certificate                   |
+| Root           | optional | /var/www      | static content root directory           |
+| Index          | optional |               | directory index file, use "" to disable |
+| Verbose        | optional | 0             | 0(off), 1(low), 2(medium), 3(high)      |
+| Logfile        | optional |               | readable and writable log file          |
+| Proxy          | optional | msf default   | See proxy sub-attributes table          |
 
-proxy sub-attributes
---------------------
-| Sub-attribute Name | Required | Default value                   | Supported value or description          |
-|--------------------|----------|---------------------------------|-----------------------------------------|
-| type               | Yes      | reverse                         | reverse                                 |
-| description        | No       |                                 | administrative description of the proxy |
-| match              | Yes      | Mozilla/5.0 (Windows NT 6.1;... | valid UA string                         |
-| target             | Yes      | http://msf.toor.si:80           | valid http:// or https:// scheme URI    |
+configuration file - proxy sub-attributes
+-----------------------------------------
+| Sub-attribute Name | Type     | Default value | Supported value(s) / Description        |
+|--------------------|----------|---------------|-----------------------------------------|
+| type               | optional |               | reverse                                 |
+| description        | optional |               | administrative description of the proxy |
+| match              | optional |               | valid UA string                         |
+| target             | required |               | valid http:// or https:// scheme URI    |
 
 ## Contributing
 If you find this project useful and want to contribute, we will be more than
