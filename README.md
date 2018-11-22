@@ -17,11 +17,11 @@ command-line or inside a Docker container for even more security.
 ## Use-cases
 Ruse helps you overcome multiple challenges, such as:
  * Hiding your HTTP listener(s) from Incident Response teams.
- * Load-balance to multiple remote listeners.
+ * Load-balancing to multiple remote listeners.
  * Simultaneously serving static files and listening for reverse HTTP shellcodes on a single port.
  * Leveraging domain-fronting by exposing the redirector from a trusted location.
  * Pivoting through an already compromised host by proxying reverse HTTP shellcodes.
- * [Proxy your Metasploit's reverse_http payloads](examples/msf-reverse-https.md).
+ * [Proxy your Metasploit's reverse_http(s) payloads](examples/msf-reverse-https.md).
 
 If you're doing Red Team operations or you may simply want to hide your HTTP
 listeners during an engagement, Ruse may be of help.
@@ -32,10 +32,15 @@ as limiting your fingerprint or to fool them by serving or proxying traffic to
 a legimate web site.
 
 ## Building from source
-To build Ruse from source, simply enter:
+To build Ruse from source using Docker, simply enter:
 ```
 $ make build
 building: bin/amd64/ruse
+```
+
+Alternatively, you can build the `ruse` executable manually using the original Go compiler:
+```
+$ go build -o ruse src/ruse/main.go
 ```
 
 ## Running from the command-line
@@ -44,10 +49,10 @@ Ruse can run unprivileged from a terminal:
 $ bin/amd64/ruse -c conf/ruse.conf
 Starting HTTP Server on localhost:8000
 ```
-By default Ruse ships with an example configuration file which only allows
-plain-text HTTP connections from localhost on port tcp/8000. It's also
-configured to proxy traffic from metasploit's reverse HTTP payloads by matching
-their User-Agent header fields.
+By default Ruse ships with an [example configuration file](conf/ruse.conf)
+which only allows plain-text HTTP connections from localhost on port tcp/8000.
+It's also configured to proxy traffic from metasploit's reverse HTTP payloads
+by matching their User-Agent header fields.
 
 ## Building and running under Docker
 Ruse can also run under a Docker container, and thus in a matter of seconds.
