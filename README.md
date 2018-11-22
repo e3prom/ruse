@@ -14,12 +14,14 @@ command-line or inside a Docker container for even more security.
  * Serves static files (with optional directory listing)
  * File Logging
  
-## Why
+## Use-cases
 Ruse helps you overcome multiple challenges, such as:
  * Hiding your HTTP listener(s) from Incident Response teams.
  * Load-balance to multiple remote listeners.
  * Simultaneously serving static files and listening for reverse HTTP shellcodes on a single port.
  * Leveraging domain-fronting by exposing the redirector from a trusted location.
+ * Pivoting through an already compromised host by proxying reverse HTTP shellcodes.
+ * [Proxy your Metasploit's reverse_http payloads](examples/msf-reverse-https.md).
 
 If you're doing Red Team operations or you may simply want to hide your HTTP
 listeners during an engagement, Ruse may be of help.
@@ -36,7 +38,7 @@ $ make build
 building: bin/amd64/ruse
 ```
 
-## Running from the command-line: 
+## Running from the command-line
 Ruse can run unprivileged from a terminal:
 ```
 $ bin/amd64/ruse -c conf/ruse.conf
@@ -47,7 +49,7 @@ plain-text HTTP connections from localhost on port tcp/8000. It's also
 configured to proxy traffic from metasploit's reverse HTTP payloads by matching
 their User-Agent header fields.
 
-## Building and running under Docker:
+## Building and running under Docker
 Ruse can also run under a Docker container, and thus in a matter of seconds.
 Enter the `make container` command to build the Docker image and to push it to
 your local registry. Once the image has been created, simply start a new
