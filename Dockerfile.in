@@ -14,8 +14,6 @@
 
 FROM ARG_FROM
 
-MAINTAINER Evil Duck
-
 ADD bin/ARG_ARCH/ARG_BIN /ARG_BIN
 RUN mkdir /var/www
 

@@ -8,9 +8,13 @@ command-line or inside a Docker container for even more security.
 
 ## Features
  * Runs under Linux, \*BSD, MacOS, and Windows (Win7, Server 2008R2 and later)
+ * Supports AMD64, ARM, ARM64 and PPC64 (little-endian)
  * No external dependencies
  * HTTP and HTTPS (SSL/TLS) support
- * Selective Reverse Proxying
+ * Support IPv4 and IPv6
+ * Selective Reverse Proxying based on:
+   * User-Agent String(s)
+   * CIDR Network(s)
  * Serves static files (with optional directory listing)
  * File Logging
  
@@ -20,7 +24,7 @@ Ruse helps you overcome multiple challenges, such as:
  * Load-balancing to multiple remote listeners.
  * Simultaneously serving static files and listening for reverse HTTP shellcodes on a single port.
  * Leveraging domain-fronting by exposing the redirector from a trusted location.
- * Pivoting through an already compromised host by proxying reverse HTTP shellcodes.
+ * Pivoting post-exploitation by proxying reverse HTTP(S) shellcodes.
  * [Proxy your Metasploit's reverse_http(s) payloads](examples/msf-reverse-https.md).
 
 If you're doing Red Team operations or you may simply want to hide your HTTP
@@ -61,34 +65,9 @@ your local registry. Once the image has been created, simply start a new
 container like demonstrated in the below example:
 ```
 $ make container
-building: bin/amd64/ruse
-Sending build context to Docker daemon  31.29MB
-Step 1/6 : FROM alpine
- ---> 196d12cf6ab1
-Step 2/6 : MAINTAINER Evil Duck
- ---> Running in 316636af5aec
-Removing intermediate container 316636af5aec
- ---> accc21a45d03
-Step 3/6 : ADD bin/amd64/ruse /ruse
- ---> d9f9d36cfb71
-Step 4/6 : RUN mkdir /var/www
- ---> Running in d8de6e8333aa
-Removing intermediate container d8de6e8333aa
- ---> 008182dded9d
-Step 5/6 : USER nobody:nobody
- ---> Running in 5bcd97b5855e
-Removing intermediate container 5bcd97b5855e
- ---> f50761fd621c
-Step 6/6 : ENTRYPOINT ["/ruse"]
- ---> Running in 6eb47e4dc6c9
-Removing intermediate container 6eb47e4dc6c9
- ---> e18c33f2ec0d
-Successfully built e18c33f2ec0d
-Successfully tagged registry/ruse-amd64:59ea848-dirty
-container: registry/ruse-amd64:59ea848-dirty
-
+[...]
 $ docker run -v `pwd`/conf/ruse.conf:/etc/ruse.conf -p 127.0.0.1:8000:8000/tcp registry/ruse-amd64:59ea848-dirty
-Starting HTTP Server on 0.0.0.0:8000
+Starting HTTP Server on localhost:8000
 ```
 
 ## Configuring
@@ -102,28 +81,36 @@ options, please see the tables below for further reference:
 
 configuration file - main attributes
 ------------------------------------
-| Attribute Name | Type     | Default value | Supported value(s) / Description        |
-|----------------|----------|---------------|-----------------------------------------|
-| Hostname       | optional | localhost     | hostname or IPv4 address                |
-| Protocols      | optional | plain         | plain, tls                              |
-| Port           | optional | 8000          | 0-65535                                 |
-| TLSPort        | optional | 8443          | 0-65535                                 |
-| TLSKey         | optional | server.key    | PEM private key                         |
-| TLSCert        | optional | server.crt    | PEM X.509 certificate                   |
-| Root           | optional | /var/www      | static content root directory           |
-| Index          | optional |               | directory index file, use "" to disable |
-| Verbose        | optional | 0             | 0(off), 1(low), 2(medium), 3(high)      |
-| Logfile        | optional |               | readable and writable log file          |
-| Proxy          | optional | msf default   | See proxy sub-attributes table          |
+| Attribute Name | Type     | Default value(s) | Supported value(s) / Description        |
+|----------------|----------|------------------|-----------------------------------------|
+| Hostname       | optional | localhost        | hostname or IPv4 address                |
+| Protocols      | optional | plain            | plain, tls                              |
+| Port           | optional | 8000             | 0-65535                                 |
+| TLSPort        | optional | 8443             | 0-65535                                 |
+| TLSKey         | optional | server.key       | PEM private key                         |
+| TLSCert        | optional | server.crt       | PEM X.509 certificate                   |
+| Root           | optional | /var/www         | static content root directory           |
+| Index          | optional |                  | directory index file, use "" to disable |
+| Verbose        | optional | 0                | 0(off), 1(low), 2(medium), 3(high)      |
+| Logfile        | optional |                  | readable and writable log file          |
+| Proxy          | optional | msf default      | See proxy sub-attributes table          |
 
 configuration file - proxy sub-attributes
 -----------------------------------------
-| Sub-attribute Name | Type     | Default value | Supported value(s) / Description        |
-|--------------------|----------|---------------|-----------------------------------------|
-| type               | optional |               | reverse                                 |
-| description        | optional |               | administrative description of the proxy |
-| match              | optional |               | valid UA string                         |
-| target             | required |               | valid http:// or https:// scheme URI    |
+| Sub-attribute Name | Type     | Default value(s) | Supported value(s) / Description        |
+|--------------------|----------|------------------|-----------------------------------------|
+| Type               | optional |                  | reverse                                 |
+| Description        | optional |                  | administrative description of the proxy |
+| Match              | required |                  | see Match sub-attribute table           |
+| Target             | required |                  | valid http:// or https:// scheme URI    |
+
+configuration file - match sub-attributes
+-----------------------------------------
+| Sub-attribute Name | Type     | Default value(s) | Supported value(s) / Description        |
+|--------------------|----------|------------------|-----------------------------------------|
+| UserAgent          | optional |                  | array of valid User-Agent string(s)     |
+| Network            | optional |                  | array of network(s) in CIDR notation    |
+
 
 ## Contributing
 If you find this project useful and want to contribute, we will be more than

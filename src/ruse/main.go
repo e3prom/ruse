@@ -65,11 +65,17 @@ type Config struct {
 	Proxy []Proxy
 }
 
-// Proxy array type definition
+// Proxy struct definition
 type Proxy struct {
 	Type   string
-	Match  string
+	Match  Match
 	Target string
+}
+
+// Match struct definition
+type Match struct {
+	UserAgent []string
+	Network   []string
 }
 
 // init function for the flag package.
@@ -141,13 +147,55 @@ func main() {
 // checkToProxy simply checks if the incoming request's user-agent matches any
 // of the configured proxy matching criterias. If it does, it returns true.
 func checkToProxy(w http.ResponseWriter, r *http.Request, config *Config) bool {
+	// declare and initialize isMatchedNetwork and isMatchUserAgent to false.
+	var isMatchedNetwork bool = false
+	var isMatchedUserAgent bool = false
+
+	// set clientAddr to the request's client address.
+	clientAddr := strings.Split(r.RemoteAddr, ":")
+
+	// For every Proxy definition:
 	for _, c := range config.Proxy {
-		if r.UserAgent() == c.Match {
+		// for every CIDR networks specified as matching criteria, call
+		// isAddrInNetwork() with the client IP address. If it returns True
+		// then set the 'isMatchedNetwork' to True as well.
+		for _, n := range c.Match.Network {
+			if isAddrInNetwork(clientAddr[0], n) {
+				isMatchedNetwork = true
+			}
+		}
+		// for every User-Agent specified as matching criteria, check if the
+		// request's User-Agent header field matches. If it does, set
+		// isMatchedUseragent to True.
+		for _, ua := range c.Match.UserAgent {
+			if r.UserAgent() == ua {
+				isMatchedUserAgent = true
+			}
+		}
+
+		// if both matching criteria are True, then perform proxying.
+		if isMatchedUserAgent && isMatchedNetwork {
 			performProxying(w, r, c.Target)
 			return true
 		}
 	}
+	// if no Proxy definition matched, return False.
 	return false
+}
+
+// isAddrInNetwork takes a client address and a CIDR network as arguments,
+// parses and converts them in their appropriate types. The function will
+// returns True if the passed network is "" (empty) OR the boolean result of
+// the call to the 'Contains' methods. The latter returns True is the IP is
+// inside the CIDR network, or False otherwise.
+func isAddrInNetwork(cAddr string, cNet string) bool {
+	if cNet != "" {
+		_, n, _ := net.ParseCIDR(cNet)
+		ip := net.ParseIP(cAddr)
+		return n.Contains(ip)
+	} else {
+		return true
+	}
 }
 
 // getContentWithConfig wrapper function used to get pointer to the
@@ -170,8 +218,7 @@ func getContentWithConfig(config *Config) http.HandlerFunc {
 		if !checkToProxy(w, r, config) {
 			// print client requests to log
 			if config.Verbose > 1 {
-				log.Printf("access: \"%s %s %s\" - \"%s\"\n", r.Method, r.URL, r.Proto,
-					r.UserAgent())
+				log.Printf(": %s - \"%s %s %s\" - \"%s\"\n", r.RemoteAddr, r.Method, r.URL, r.Proto, r.UserAgent())
 			}
 			http.ServeFile(w, r, filepath.Join(config.Root,
 				processPath(r.URL.Path)))
