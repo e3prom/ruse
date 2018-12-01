@@ -2,16 +2,21 @@
 Ruse is an open source, multi-platform HTTP redirector that make it easy to
 conceal C2 or shellcodes listeners using the Hypertext Transfer Protocol.
 
-Ruse supports both plain-text HTTP and HTTPS, in a simple to use
+It combines the Python's
+[SimpleHTTPServer](https://docs.python.org/2/library/simplehttpserver.html),
+[mod_rewrite](https://httpd.apache.org/docs/current/mod/mod_rewrite.html),
+and Apache's SSL ProxyPass features, all in a single tool.
+
+Ruse supports both plain-text HTTP and HTTPS, in a fast and easy to configure
 multi-platform server executable. Ruse can be rapidly deployed from the
 command-line or inside a Docker container for even more security.
 
 ## Features
- * Runs under Linux, \*BSD, MacOS, and Windows (Win7, Server 2008R2 and later)
+ * Runs under Linux, \*BSD, MacOS, and Windows (Win 7, Server 2008R2 and later)
  * Supports AMD64, ARM, ARM64 and PPC64 (little-endian)
  * No external dependencies
  * HTTP and HTTPS (SSL/TLS) support
- * Support IPv4 and IPv6
+ * Support IPv4 and IPv6 addressing
  * Selective Reverse Proxying based on:
    * User-Agent String(s)
    * CIDR Network(s)
@@ -25,7 +30,7 @@ Ruse helps you overcome multiple challenges, such as:
  * Simultaneously serving static files and listening for reverse HTTP shellcodes on a single port.
  * Leveraging domain-fronting by exposing the redirector from a trusted location.
  * Pivoting post-exploitation by proxying reverse HTTP(S) shellcodes.
- * [Proxy your Metasploit's reverse_http(s) payloads](examples/msf-reverse-https.md).
+ * Quickly [proxy your Metasploit's reverse_http(s) payloads](examples/msf-reverse-https.md).
 
 If you're doing Red Team operations or you may simply want to hide your HTTP
 listeners during an engagement, Ruse may be of help.
@@ -36,7 +41,7 @@ as limiting your fingerprint or to fool them by serving or proxying traffic to
 a legimate web site.
 
 ## Building from source
-To build Ruse from source using Docker, simply enter:
+To build Ruse from source using a Docker container, simply enter:
 ```
 $ make build
 building: bin/amd64/ruse
@@ -93,9 +98,9 @@ configuration file - main attributes
 | Index          | optional |                  | directory index file, use "" to disable |
 | Verbose        | optional | 0                | 0(off), 1(low), 2(medium), 3(high)      |
 | Logfile        | optional |                  | readable and writable log file          |
-| Proxy          | optional | msf default      | See proxy sub-attributes table          |
+| Proxy          | optional | msf default      | See Proxy sub-attributes table          |
 
-configuration file - proxy sub-attributes
+configuration file - Proxy sub-attributes
 -----------------------------------------
 | Sub-attribute Name | Type     | Default value(s) | Supported value(s) / Description        |
 |--------------------|----------|------------------|-----------------------------------------|
@@ -104,13 +109,16 @@ configuration file - proxy sub-attributes
 | Match              | required |                  | see Match sub-attribute table           |
 | Target             | required |                  | valid http:// or https:// scheme URI    |
 
-configuration file - match sub-attributes
+configuration file - Match sub-attributes
 -----------------------------------------
-| Sub-attribute Name | Type     | Default value(s) | Supported value(s) / Description        |
-|--------------------|----------|------------------|-----------------------------------------|
-| UserAgent          | optional |                  | array of valid User-Agent string(s)     |
-| Network            | optional |                  | array of network(s) in CIDR notation    |
+| Sub-attribute Name | Type     | Default value(s) | Supported value(s) / Description            |
+|--------------------|----------|------------------|---------------------------------------------|
+| UserAgent          | optional |                  | an array of valid User-Agent string(s)      |
+| Network            | optional |                  | an array of network(s) in CIDR notation[¹]  |
 
+#### ¹ CIDR Invert Matching
+[¹]:#-cidr-invert-matching
+You can negate CIDR networks matching using the exclamation mark `!` character.
 
 ## Contributing
 If you find this project useful and want to contribute, we will be more than

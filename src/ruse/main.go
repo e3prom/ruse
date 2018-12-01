@@ -160,8 +160,16 @@ func checkToProxy(w http.ResponseWriter, r *http.Request, config *Config) bool {
 		// isAddrInNetwork() with the client IP address. If it returns True
 		// then set the 'isMatchedNetwork' to True as well.
 		for _, n := range c.Match.Network {
-			if isAddrInNetwork(clientAddr[0], n) {
-				isMatchedNetwork = true
+			// if it starts with an exclamation mark character.
+			if n[0] == 0x21 {
+				if isAddrInNetwork(clientAddr[0], n[1:]) {
+					isMatchedNetwork = false
+					break // do not eval further.
+				}
+			} else {
+				if isAddrInNetwork(clientAddr[0], n) {
+					isMatchedNetwork = true
+				}
 			}
 		}
 		// for every User-Agent specified as matching criteria, check if the
@@ -190,7 +198,11 @@ func checkToProxy(w http.ResponseWriter, r *http.Request, config *Config) bool {
 // inside the CIDR network, or False otherwise.
 func isAddrInNetwork(cAddr string, cNet string) bool {
 	if cNet != "" {
-		_, n, _ := net.ParseCIDR(cNet)
+		_, n, err := net.ParseCIDR(cNet)
+		if err != nil {
+			log.Printf("error while parsing CIDR network %s.", cNet)
+			return false
+		}
 		ip := net.ParseIP(cAddr)
 		return n.Contains(ip)
 	} else {
@@ -218,7 +230,8 @@ func getContentWithConfig(config *Config) http.HandlerFunc {
 		if !checkToProxy(w, r, config) {
 			// print client requests to log
 			if config.Verbose > 1 {
-				log.Printf(": %s - \"%s %s %s\" - \"%s\"\n", r.RemoteAddr, r.Method, r.URL, r.Proto, r.UserAgent())
+				log.Printf(": %s - \"%s %s %s\" - \"%s\"\n", r.RemoteAddr,
+					r.Method, r.URL, r.Proto, r.UserAgent())
 			}
 			http.ServeFile(w, r, filepath.Join(config.Root,
 				processPath(r.URL.Path)))
