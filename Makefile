@@ -15,6 +15,9 @@
 # The binary to build (just the basename).
 BIN := ruse
 
+# Ruse's configuration filename.
+RUSE_CONF = ruse.conf
+
 # This repo's root import path (under GOPATH).
 PKG := github.com/e3prom/ruse
 
@@ -29,6 +32,12 @@ VERSION := $(shell git describe --tags --always --dirty)
 #
 # This version-strategy uses a manual value to set the version string
 #VERSION := 1.2.3
+
+# Go build environement variables
+GO = go
+GOBUILD = $(GO) build
+GOCLEAN = $(GO) clean
+SRC_DIR = src
 
 ###
 ### These variables should not need tweaking.
@@ -59,7 +68,10 @@ BUILD_IMAGE ?= golang:1.11-alpine
 # If you want to build all binaries, see the 'all-build' rule.
 # If you want to build all containers, see the 'all-container' rule.
 # If you want to build AND push all containers, see the 'all-push' rule.
-all: build
+all: go-build
+
+go-build:
+	$(GOBUILD) -o $(BIN) -v $(SRC_DIR)/$(BIN)/main.go
 
 build-%:
 	@$(MAKE) --no-print-directory ARCH=$* build
@@ -166,7 +178,15 @@ build-dirs:
 	@mkdir -p bin/$(ARCH)
 	@mkdir -p .go .go/cache .go/src/$(PKG) .go/pkg .go/bin .go/std/$(ARCH)
 
-clean: container-clean bin-clean
+
+install: go-build
+	cp $(BIN) /usr/local/bin
+	cp conf/$(RUSE_CONF) /etc/$(RUSE_CONF)
+
+clean: go-clean container-clean bin-clean
+
+go-clean:
+	rm -rf $(BIN)
 
 container-clean:
 	rm -rf .container-* .dockerfile-* .push-*

@@ -43,15 +43,19 @@ as limiting your fingerprint or to fool them by serving or proxying traffic to
 a legimate web site.
 
 ## Building from source
-To build Ruse from source using a Docker container, simply enter:
+To build Ruse from source, simply enter `make`, it will build the `ruse`
+executable in the current working directory:
 ```
-$ make build
-building: bin/amd64/ruse
+$ make
+go build -o ruse -v src/ruse/main.go
 ```
 
-Alternatively, you can build the `ruse` executable manually using the original Go compiler:
+Alternatively, you can build Ruse inside a Docker container using the `make
+container` command:
 ```
-$ go build -o ruse src/ruse/main.go
+$ make container
+building: bin/amd64/ruse
+[...]
 ```
 
 ## Running from the command-line
