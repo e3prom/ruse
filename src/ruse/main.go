@@ -101,7 +101,7 @@ func main() {
 		f, err := os.OpenFile(config.LogFile,
 			os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 		if err != nil {
-			log.Fatal("error opening log file: %s", err)
+			log.Fatalf("error opening log file: %s", err)
 		}
 		defer f.Close()
 
