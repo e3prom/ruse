@@ -86,7 +86,6 @@ Starting HTTP Server on localhost:8000
 If you do not want to build Ruse from source, you can directly download the binaries below. Only binaries for production releases and major operating systems and architectures are available.
 
 ### Releases
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 | Filename                                                                                                          | OS        | Architecture  | Version | SHA256 Checksum                                                             |
 |-------------------------------------------------------------------------------------------------------------------|-----------|---------------|---------|-----------------------------------------------------------------------------|
 | [ruse-1.0.0-win-amd64.zip](//github.com/e3prom/ruse/releases/download/1.0.0/ruse-1.0.0-win-amd64.zip)             | Windows   | x86-64        | 1.0.0   | <sub>b19ce0f14663a72a4b079f4d08eb53fe28cf5e719797132730619b3066071d50</sub> |

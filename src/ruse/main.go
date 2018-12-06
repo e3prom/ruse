@@ -32,8 +32,6 @@ const (
 // Global program variables.
 var configFile = CONFIG_FILE
 var proto = make(map[string]struct{})
-var userAgent []string
-var reUserAgent []*regexp.Regexp
 
 // Configuration File Structure.
 type Config struct {
@@ -76,8 +74,10 @@ type Proxy struct {
 
 // Match struct definition
 type Match struct {
-	UserAgent []string
-	Network   []string
+	UserAgent    []string
+	Network      []string
+	_userAgent   []string
+	_reUserAgent []*regexp.Regexp
 }
 
 // init function for the flag package.
@@ -188,14 +188,14 @@ func checkToProxy(w http.ResponseWriter, r *http.Request, config *Config) bool {
 		// for every User-Agent specified as matching criteria, check if the
 		// request's User-Agent header field matches. If it does, set
 		// isMatchedUseragent to True.
-		for _, ua := range userAgent {
+		for _, ua := range p.Match._userAgent {
 			if r.UserAgent() == ua {
 				isMatchedUserAgent = true
 			}
 		}
 
 		// for every pre-compiled UA's regexp, perform matching.
-		for _, re := range reUserAgent {
+		for _, re := range p.Match._reUserAgent {
 			if re.MatchString(r.UserAgent()) {
 				isMatchedUserAgent = true
 			}
@@ -328,16 +328,17 @@ func initAndParseConfig(cf string, config *Config) {
 	// if regular expressions are used inside the values of the User-Agent
 	// sub-attributes of the Proxy's Match attribute. Then compile the
 	// configured regexp once and place their respective pointers inside a
-	// slice of pointers.
-	for _, p := range config.Proxy {
+	// slice of pointers. Here the index is used to append values to the Config
+	// structure and not to the local copy of the for loop.
+	for i, p := range config.Proxy {
 		for _, ua := range p.Match.UserAgent {
 			if (len(ua) > 0) && (ua[0] == 0x7E) {
 				rePtr, err := regexp.Compile(ua[1:])
 				if err == nil {
-					reUserAgent = append(reUserAgent, rePtr)
+					config.Proxy[i].Match._reUserAgent = append(config.Proxy[i].Match._reUserAgent, rePtr)
 				}
 			} else {
-				userAgent = append(userAgent, ua)
+				config.Proxy[i].Match._userAgent = append(config.Proxy[i].Match._userAgent, ua)
 			}
 		}
 	}
