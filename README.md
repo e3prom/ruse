@@ -1,8 +1,7 @@
-# Ruse - a multi-platform HTTP Redirector
-![Ruse Logo](docs/ruse_240x122.png "Ruse - HTTP Redirector")
+![Ruse Logo](docs/images/ruse_240x122.png "Ruse - Redirector")
 
-Ruse is an open source, multi-platform HTTP redirector that make it easy to
-conceal C2 or shellcodes listeners using the Hypertext Transfer Protocol.
+Ruse is an open source, multi-platform Redirector that make it easy to conceal
+C2 and shellcodes listeners using the Hypertext Transfer Protocol.
 
 It combines the Python's
 [SimpleHTTPServer](https://docs.python.org/2/library/simplehttpserver.html),
@@ -10,8 +9,8 @@ It combines the Python's
 and Apache's SSL ProxyPass features, all in a single tool.
 
 Ruse supports both plain-text HTTP and HTTPS, in a fast and easy to configure
-multi-platform server executable. Ruse can be rapidly deployed from the
-command-line or inside a Docker container for even more security.
+portable server executable. Ruse can be rapidly deployed from the command-line
+or inside a Docker container for even more security.
 
 ## Features
  * Runs under Linux, \*BSD, Mac OS X, and Windows (7, Server 2008R2 and later)
@@ -20,8 +19,10 @@ command-line or inside a Docker container for even more security.
  * HTTP and HTTPS (SSL/TLS) support
  * Support IPv4 and IPv6 addressing
  * Selective Reverse Proxying based on:
-   * User-Agent String(s)
-   * CIDR Network(s)
+   * User-Agent header field, matching:
+     * Exact String(s)
+     * Regular Expression(s)
+   * CIDR network(s)
  * Serves static files (with optional directory listing)
  * File Logging
  
@@ -103,17 +104,28 @@ configuration file - main attributes
 ------------------------------------------------------------------------------------------
 | Attribute Name | Type     | Default value(s) | Supported value(s) / Description        |
 |----------------|----------|------------------|-----------------------------------------|
-| Hostname       | optional | localhost        | hostname or IPv4 address                |
+| Hostname       | optional | localhost        | valid hostname or IPv4/IPv6 address[¹]  |
 | Protocols      | optional | plain            | plain, tls                              |
 | Port           | optional | 8000             | 0-65535                                 |
 | TLSPort        | optional | 8443             | 0-65535                                 |
 | TLSKey         | optional | server.key       | PEM private key                         |
 | TLSCert        | optional | server.crt       | PEM X.509 certificate                   |
 | Root           | optional | /var/www         | static content root directory           |
-| Index          | optional |                  | directory index file, use "" to disable |
+| Index          | optional |                  | directory index file[²]                 |
 | Verbose        | optional | 0                | 0(off), 1(low), 2(medium), 3(high)      |
 | Logfile        | optional |                  | readable and writable log file          |
 | Proxy          | optional | msf default      | see Proxy sub-attributes table          |
+
+#### ¹ IP Addresses
+[¹]:#-ip-addresses
+Enter a valid IP address to listen on. IPv6 addresses must be enclosed in
+square brackets `[]`. Use the special values `0.0.0.0/0` or `[::0]` to listen
+on all interfaces.
+
+#### ² Directory Index
+[²]:#-directory-index
+Use an empty `""` value as the index page to enable recursive directory
+listing.
 
 configuration file - Proxy sub-attributes
 ----------------------------------------------------------------------------------------------

@@ -32,6 +32,8 @@ const (
 // Global program variables.
 var configFile = CONFIG_FILE
 var proto = make(map[string]struct{})
+var userAgent []string
+var reUserAgent []*regexp.Regexp
 
 // Configuration File Structure.
 type Config struct {
@@ -89,14 +91,22 @@ func init() {
 // server(s). The HTTP server is conditionally started in a seperate go
 // routine, so it doesn't not block the start of the TLS server.
 func main() {
-	// parse command-line parameters
+	// parse command-line parameters.
 	flag.Parse()
 
-	// parse configuration file
-	var config *Config = initAndParseConfig(configFile)
-	http.HandleFunc("/", getContentWithConfig(config))
+	// declare and initialize configuration structure.
+	config := Config{}
 
-	// trigger file logging
+	// parse configuration file.
+	initAndParseConfig(configFile, &config)
+
+	// compile hard-coded directory regexp once.
+	reDir := regexp.MustCompile(".*/$")
+
+	// register call back function for handling HTTP traffic.
+	http.HandleFunc("/", getContentWithConfig(&config, reDir))
+
+	// trigger file logging.
 	if config.LogFile != "" {
 		f, err := os.OpenFile(config.LogFile,
 			os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
@@ -155,13 +165,15 @@ func checkToProxy(w http.ResponseWriter, r *http.Request, config *Config) bool {
 	clientAddr := strings.Split(r.RemoteAddr, ":")
 
 	// For every Proxy definition:
-	for _, c := range config.Proxy {
+	for _, p := range config.Proxy {
 		// for every CIDR networks specified as matching criteria, call
 		// isAddrInNetwork() with the client IP address. If it returns True
 		// then set the 'isMatchedNetwork' to True as well.
-		for _, n := range c.Match.Network {
+		for _, n := range p.Match.Network {
 			// if it starts with an exclamation mark character.
-			if n[0] == 0x21 {
+			// bug fix: to avoid triggering index out-of-range errors, first
+			// ensure the referenced array has at least one element.
+			if (len(n) > 0) && (n[0] == 0x21) {
 				if isAddrInNetwork(clientAddr[0], n[1:]) {
 					isMatchedNetwork = false
 					break // do not eval further.
@@ -172,18 +184,26 @@ func checkToProxy(w http.ResponseWriter, r *http.Request, config *Config) bool {
 				}
 			}
 		}
+
 		// for every User-Agent specified as matching criteria, check if the
 		// request's User-Agent header field matches. If it does, set
 		// isMatchedUseragent to True.
-		for _, ua := range c.Match.UserAgent {
+		for _, ua := range userAgent {
 			if r.UserAgent() == ua {
 				isMatchedUserAgent = true
 			}
 		}
 
-		// if both matching criteria are True, then perform proxying.
+		// for every pre-compiled UA's regexp, perform matching.
+		for _, re := range reUserAgent {
+			if re.MatchString(r.UserAgent()) {
+				isMatchedUserAgent = true
+			}
+		}
+
+		// finally, if both matching criteria are True, then perform proxying.
 		if isMatchedUserAgent && isMatchedNetwork {
-			performProxying(w, r, c.Target)
+			performProxying(w, r, p.Target)
 			return true
 		}
 	}
@@ -214,12 +234,11 @@ func isAddrInNetwork(cAddr string, cNet string) bool {
 // configuration's structure. It wraps the HTTP handler function which serves
 // files recursively from the web root directory and the request's URL path as
 // retured by the sanitizePath() function.
-func getContentWithConfig(config *Config) http.HandlerFunc {
+func getContentWithConfig(config *Config, re *regexp.Regexp) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		processPath := func(p string) string {
 			// regexp for directories in the path string 'p'.
-			r := regexp.MustCompile(".*/$")
-			if r.MatchString(p) {
+			if re.MatchString(p) {
 				// serve index file instead of the default directory listing.
 				p = p + config.Index
 			}
@@ -271,11 +290,8 @@ func performProxying(w http.ResponseWriter, r *http.Request, t string) {
 
 // initAndParseConfig function dedicated to the declaration and initialization
 // of the Config structure and the parsing of the JSON formatted configuration
-// file. Upon successful parsing of the config file, it returns a pointer to
-// the Config structure.
-func initAndParseConfig(cf string) *Config {
-	config := Config{}
-
+// file.
+func initAndParseConfig(cf string, config *Config) {
 	// Set default values for the important members of the Config structure.
 	config.Hostname = "localhost"
 	config.Port = 8000
@@ -294,6 +310,9 @@ func initAndParseConfig(cf string) *Config {
 	defer f.Close()
 
 	dec := json.NewDecoder(f)
+
+	// decode the configuration file and fill the passed-by-reference
+	// structure.
 	err = dec.Decode(&config)
 	if err != nil {
 		fmt.Printf("error while reading configuration file: %v\n", err)
@@ -306,5 +325,20 @@ func initAndParseConfig(cf string) *Config {
 		proto[s] = struct{}{}
 	}
 
-	return &config
+	// if regular expressions are used inside the values of the User-Agent
+	// sub-attributes of the Proxy's Match attribute. Then compile the
+	// configured regexp once and place their respective pointers inside a
+	// slice of pointers.
+	for _, p := range config.Proxy {
+		for _, ua := range p.Match.UserAgent {
+			if (len(ua) > 0) && (ua[0] == 0x7E) {
+				rePtr, err := regexp.Compile(ua[1:])
+				if err == nil {
+					reUserAgent = append(reUserAgent, rePtr)
+				}
+			} else {
+				userAgent = append(userAgent, ua)
+			}
+		}
+	}
 }
