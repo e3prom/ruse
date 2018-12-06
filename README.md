@@ -62,7 +62,7 @@ building: bin/amd64/ruse
 ## Running from the command-line
 Ruse can run unprivileged from a terminal:
 ```
-$ bin/amd64/ruse -c conf/ruse.conf
+$ ./ruse -c conf/ruse.conf
 Starting HTTP Server on localhost:8000
 ```
 By default Ruse ships with a [basic configuration file](conf/ruse.conf)
@@ -85,8 +85,9 @@ Starting HTTP Server on localhost:8000
 ## Binaries
 If you do not want to build Ruse from source, you can directly download the binaries below. Only binaries for production releases and major operating systems and architectures are available.
 
+### Releases
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-| Filename (download link)                                                                                          | OS        | Architecture  | Version | SHA256 Checksum                                                             |
+| Filename                                                                                                          | OS        | Architecture  | Version | SHA256 Checksum                                                             |
 |-------------------------------------------------------------------------------------------------------------------|-----------|---------------|---------|-----------------------------------------------------------------------------|
 | [ruse-1.0.0-win-amd64.zip](//github.com/e3prom/ruse/releases/download/1.0.0/ruse-1.0.0-win-amd64.zip)             | Windows   | x86-64        | 1.0.0   | <sub>b19ce0f14663a72a4b079f4d08eb53fe28cf5e719797132730619b3066071d50</sub> |
 | [ruse-1.0.0-darwin-amd64.tar.gz](//github.com/e3prom/ruse/releases/download/1.0.0/ruse-1.0.0-darwin-amd64.tar.gz) | Mac OS X  | x86-64        | 1.0.0   | <sub>e025ea572979122d67a521a09af65c739a4d7bebc8316d7c8efc920287fbe464</sub> |
@@ -100,8 +101,7 @@ command-line switch `-c`.
 The configuration file is in JSON format, and accepts various configuration
 options, please see the tables below for further reference:
 
-configuration file - main attributes
-------------------------------------------------------------------------------------------
+### Configuration file - main attributes
 | Attribute Name | Type     | Default value(s) | Supported value(s) / Description        |
 |----------------|----------|------------------|-----------------------------------------|
 | Hostname       | optional | localhost        | valid hostname or IPv4/IPv6 address[¹]  |
@@ -127,8 +127,7 @@ on all interfaces.
 Use an empty `""` value as the index page to enable recursive directory
 listing.
 
-configuration file - Proxy sub-attributes
-----------------------------------------------------------------------------------------------
+### Configuration file - Proxy sub-attributes
 | Sub-attribute Name | Type     | Default value(s) | Supported value(s) / Description        |
 |--------------------|----------|------------------|-----------------------------------------|
 | Type               | optional |                  | reverse                                 |
@@ -136,15 +135,20 @@ configuration file - Proxy sub-attributes
 | Match              | required |                  | see Match sub-attribute table           |
 | Target             | required |                  | valid http:// or https:// scheme URI    |
 
-configuration file - Match sub-attributes
---------------------------------------------------------------------------------------------------
-| Sub-attribute Name | Type     | Default value(s) | Supported value(s) / Description            |
-|--------------------|----------|------------------|---------------------------------------------|
-| UserAgent          | optional |                  | an array of valid User-Agent string(s)      |
-| Network            | optional |                  | an array of network(s) in CIDR notation[¹]  |
+### Configuration file - Match sub-attributes
+| Sub-attribute Name | Type     | Default value(s) | Supported value(s) / Description                             |
+|--------------------|----------|------------------|--------------------------------------------------------------|
+| UserAgent          | optional |                  | an array of valid User-Agent string or Regular Expression[¹] |
+| Network            | optional |                  | an array of network(s) in CIDR notation[²]                   |
 
-#### ¹ CIDR Invert Matching
-[¹]:#-cidr-invert-matching
+#### ¹ Regular Expression Matching
+[¹]:#-regular-expression-matching
+You can leverage [Regular
+Expressions](https://en.wikipedia.org/wiki/Regular_expression) to match the
+HTTP User-Agent header field's values.
+
+#### ² CIDR Invert Matching
+[²]:#-cidr-invert-matching
 You can negate CIDR networks matching using the exclamation mark `!` character.
 
 ## Contributing
