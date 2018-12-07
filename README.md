@@ -87,10 +87,11 @@ Starting HTTP Server on localhost:8000
 If you do not want to build Ruse from source, you can directly download the binaries below. Only binaries for production releases and major operating systems and architectures are available.
 
 ### Releases
-| Filename                                                                                                          | OS        | Architecture  | Version | SHA256 Checksum                                                             |
-|-------------------------------------------------------------------------------------------------------------------|-----------|---------------|---------|-----------------------------------------------------------------------------|
-| [ruse-1.0.0-win-amd64.zip](//github.com/e3prom/ruse/releases/download/1.0.0/ruse-1.0.0-win-amd64.zip)             | Windows   | x86-64        | 1.0.0   | <sub>b19ce0f14663a72a4b079f4d08eb53fe28cf5e719797132730619b3066071d50</sub> |
-| [ruse-1.0.0-darwin-amd64.tar.gz](//github.com/e3prom/ruse/releases/download/1.0.0/ruse-1.0.0-darwin-amd64.tar.gz) | Mac OS X  | x86-64        | 1.0.0   | <sub>e025ea572979122d67a521a09af65c739a4d7bebc8316d7c8efc920287fbe464</sub> |
+| Filename                                                                                                                | OS                        | Architecture  | Version | SHA256 Checksum                                                             |
+|-------------------------------------------------------------------------------------------------------------------------|---------------------------|---------------|---------|-----------------------------------------------------------------------------|
+| [ruse-1.0.1-linux-debian-amd64.deb](//github.com/e3prom/ruse/releases/download/1.0.1/ruse-1.0.1-linux-debian-amd64.deb) | Linux (debian derivative) | x86-64        | 1.0.1   | <sub>6f58bbe91ac9a35a63b0e7cbae5445951d4c22aebda1e85fd175d3b41bbf3929</sub> |
+| [ruse-1.0.1-win-amd64.zip](//github.com/e3prom/ruse/releases/download/1.0.1/ruse-1.0.1-win-amd64.zip)                   | Windows                   | x86-64        | 1.0.1   | <sub>7a3f14927ddd3c266905211c6ae67a3799ea1e709e9b6b246d0e6e44eebe0afc</sub> |
+| [ruse-1.0.1-darwin-amd64.tar.gz](//github.com/e3prom/ruse/releases/download/1.0.1/ruse-1.0.1-darwin-amd64.tar.gz)       | Mac OS X                  | x86-64        | 1.0.1   | <sub>0cc864e82237614c3e7a0b06d2fa7f1580532c681d0f1f10c6abb721d72c0f80</sub> |
 
 ## Configuring
 To configure the redirector, edit and copy the [ruse.conf](conf/ruse.conf)
