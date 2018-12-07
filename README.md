@@ -93,10 +93,11 @@ If you do not want to build Ruse from source, you can directly download the bina
 | [ruse-1.0.0-darwin-amd64.tar.gz](//github.com/e3prom/ruse/releases/download/1.0.0/ruse-1.0.0-darwin-amd64.tar.gz) | Mac OS X  | x86-64        | 1.0.0   | <sub>e025ea572979122d67a521a09af65c739a4d7bebc8316d7c8efc920287fbe464</sub> |
 
 ## Configuring
-To configure the redirector, copy and edit the [ruse.conf](conf/ruse.conf)
+To configure the redirector, edit and copy the [ruse.conf](conf/ruse.conf)
 configuration file in the `/conf` directory to `/etc/ruse.conf`. The latter is
 the default configuration file path, and can be manually changed using the
-command-line switch `-c`.
+command-line `-c` switch. Also Ruse reloads its configuration file when it
+receives the SIGHUP signal.
 
 The configuration file is in JSON format, and accepts various configuration
 options, please see the tables below for further reference:
