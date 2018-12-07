@@ -331,14 +331,21 @@ func initAndParseConfig(cf string, config *Config) {
 	// slice of pointers. Here the index is used to append values to the Config
 	// structure and not to the local copy of the for loop.
 	for i, p := range config.Proxy {
+		// overwrite 'internal' below Config struct members to avoid security
+		// issues with possibly untrusted pointers and precompiled regexp
+		// passed as input from the configuration file.
+		config.Proxy[i].Match._reUserAgent = []*regexp.Regexp{}
+		config.Proxy[i].Match._userAgent = []string{""}
 		for _, ua := range p.Match.UserAgent {
 			if (len(ua) > 0) && (ua[0] == 0x7E) {
 				rePtr, err := regexp.Compile(ua[1:])
 				if err == nil {
-					config.Proxy[i].Match._reUserAgent = append(config.Proxy[i].Match._reUserAgent, rePtr)
+					config.Proxy[i].Match._reUserAgent =
+						append(config.Proxy[i].Match._reUserAgent, rePtr)
 				}
 			} else {
-				config.Proxy[i].Match._userAgent = append(config.Proxy[i].Match._userAgent, ua)
+				config.Proxy[i].Match._userAgent =
+					append(config.Proxy[i].Match._userAgent, ua)
 			}
 		}
 	}

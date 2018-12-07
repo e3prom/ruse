@@ -3,10 +3,11 @@
 Ruse is an open source, multi-platform Redirector that make it easy to conceal
 C2 and shellcodes listeners using the Hypertext Transfer Protocol.
 
-It combines the Python's
+It combines the core features of Python's
 [SimpleHTTPServer](https://docs.python.org/2/library/simplehttpserver.html),
+Apache's
 [mod_rewrite](https://httpd.apache.org/docs/current/mod/mod_rewrite.html),
-and Apache's SSL ProxyPass features, all in a single tool.
+and SSL ProxyPass, all in a single tool.
 
 Ruse supports both plain-text HTTP and HTTPS, in a fast and easy to configure
 portable server executable. Ruse can be rapidly deployed from the command-line
@@ -107,8 +108,8 @@ options, please see the tables below for further reference:
 | Protocols      | optional | plain            | plain, tls                              |
 | Port           | optional | 8000             | 0-65535                                 |
 | TLSPort        | optional | 8443             | 0-65535                                 |
-| TLSKey         | optional | server.key       | PEM private key                         |
-| TLSCert        | optional | server.crt       | PEM X.509 certificate                   |
+| TLSKey         | optional | server.key       | a valid PEM encoded private key file    |
+| TLSCert        | optional | server.crt       | a valid X.509 certificate chain file    |
 | Root           | optional | /var/www         | static content root directory           |
 | Index          | optional |                  | directory index file[²]                 |
 | Verbose        | optional | 0                | 0(off), 1(low), 2(medium), 3(high)      |
@@ -126,6 +127,7 @@ on all interfaces.
 Use an empty `""` value as the index page to enable recursive directory
 listing.
 
+----
 ### Configuration file - Proxy sub-attributes
 | Sub-attribute Name | Type     | Default value(s) | Supported value(s) / Description        |
 |--------------------|----------|------------------|-----------------------------------------|
@@ -134,6 +136,7 @@ listing.
 | Match              | required |                  | see Match sub-attribute table           |
 | Target             | required |                  | valid http:// or https:// scheme URI    |
 
+----
 ### Configuration file - Match sub-attributes
 | Sub-attribute Name | Type     | Default value(s) | Supported value(s) / Description                             |
 |--------------------|----------|------------------|--------------------------------------------------------------|
@@ -143,8 +146,9 @@ listing.
 #### ¹ Regular Expression Matching
 [¹]:#-regular-expression-matching
 You can leverage [Regular
-Expressions](https://en.wikipedia.org/wiki/Regular_expression) to match the
-HTTP User-Agent header field's values.
+Expressions](https://en.wikipedia.org/wiki/Regular_expression) for matching
+HTTP User-Agent header field's values. Use the special tilde `~` character
+followed by a valid regular expression.
 
 #### ² CIDR Invert Matching
 [²]:#-cidr-invert-matching
