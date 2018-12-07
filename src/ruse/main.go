@@ -16,11 +16,13 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"os/signal"
 	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -85,6 +87,16 @@ func init() {
 	flag.StringVar(&configFile, "c", CONFIG_FILE, "configuration file")
 }
 
+// SIGHUP handler function.
+// This function create and setup the channel for the Unix signal notifications
+// and returns the signal channel to the caller.
+func handleSIGHUP() chan os.Signal {
+	sc := make(chan os.Signal, 1)
+	signal.Notify(sc, syscall.SIGHUP)
+
+	return sc
+}
+
 // main function which essentially get the Config struct pointer back from
 // 'initAndParseConfig()', prints informational messages to the user's terminal
 // when verbosity is enabled, and starts the the built-in HTTP and/or HTTPS
@@ -96,6 +108,18 @@ func main() {
 
 	// declare and initialize configuration structure.
 	config := Config{}
+
+	// create a goroutine to handle Unix signals. it will block until a signal
+	// is received through the channel setup by the handleSIGHUP() function.
+	// When a signal is received, 's' gets the signal name and we respectively
+	// init and parse again the configuration structure and file.
+	go func() {
+		for {
+			s := <-handleSIGHUP()
+			log.Printf("signal: got %s signal, reloading configuration file...", s)
+			initAndParseConfig(configFile, &config)
+		}
+	}()
 
 	// parse configuration file.
 	initAndParseConfig(configFile, &config)
@@ -249,7 +273,7 @@ func getContentWithConfig(config *Config, re *regexp.Regexp) http.HandlerFunc {
 		if !checkToProxy(w, r, config) {
 			// print client requests to log
 			if config.Verbose > 1 {
-				log.Printf(": %s - \"%s %s %s\" - \"%s\"\n", r.RemoteAddr,
+				log.Printf("static: %s - \"%s %s %s\" - \"%s\"\n", r.RemoteAddr,
 					r.Method, r.URL, r.Proto, r.UserAgent())
 			}
 			http.ServeFile(w, r, filepath.Join(config.Root,
