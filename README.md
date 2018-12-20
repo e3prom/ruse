@@ -15,7 +15,7 @@ or inside a Docker container for even more security.
 
 ## Features
  * Runs under Linux, \*BSD, Mac OS X, and Windows (7, Server 2008R2 and later)
- * Supports AMD64, ARM, ARM64 and PPC64 (little-endian)
+ * Supports Intel x86, AMD64, ARM, ARM64 and PPC64 (little-endian)
  * No external dependencies
  * HTTP and HTTPS (SSL/TLS) support
  * Support IPv4 and IPv6 addressing
@@ -87,11 +87,12 @@ Starting HTTP Server on localhost:8000
 If you do not want to build Ruse from source, you can directly download the binaries below. Only binaries for production releases and major operating systems and architectures are available.
 
 ### Releases
-| Filename                                                                                                                | OS                        | Architecture  | Version | SHA256 Checksum                                                             |
-|-------------------------------------------------------------------------------------------------------------------------|---------------------------|---------------|---------|-----------------------------------------------------------------------------|
-| [ruse-1.0.1-linux-debian-amd64.deb](//github.com/e3prom/ruse/releases/download/1.0.1/ruse-1.0.1-linux-debian-amd64.deb) | Linux (debian derivative) | x86-64        | 1.0.1   | <sub>6f58bbe91ac9a35a63b0e7cbae5445951d4c22aebda1e85fd175d3b41bbf3929</sub> |
-| [ruse-1.0.1-win-amd64.zip](//github.com/e3prom/ruse/releases/download/1.0.1/ruse-1.0.1-win-amd64.zip)                   | Windows                   | x86-64        | 1.0.1   | <sub>7a3f14927ddd3c266905211c6ae67a3799ea1e709e9b6b246d0e6e44eebe0afc</sub> |
-| [ruse-1.0.1-darwin-amd64.tar.gz](//github.com/e3prom/ruse/releases/download/1.0.1/ruse-1.0.1-darwin-amd64.tar.gz)       | Mac OS X                  | x86-64        | 1.0.1   | <sub>0cc864e82237614c3e7a0b06d2fa7f1580532c681d0f1f10c6abb721d72c0f80</sub> |
+| Filename                                                                                                                | OS                         | Architecture  | Version | SHA256 Checksum                                                             |
+|-------------------------------------------------------------------------------------------------------------------------|----------------------------|---------------|---------|-----------------------------------------------------------------------------|
+| [ruse-1.0.1-linux-debian-amd64.deb](//github.com/e3prom/ruse/releases/download/1.0.1/ruse-1.0.1-linux-debian-amd64.deb) | Linux Debian (derivatives) | x86-64        | 1.0.1   | <sub>6f58bbe91ac9a35a63b0e7cbae5445951d4c22aebda1e85fd175d3b41bbf3929</sub> |
+| [ruse-1.0.1-win-amd64.zip](//github.com/e3prom/ruse/releases/download/1.0.1/ruse-1.0.1-win-amd64.zip)                   | Windows (amd64)            | x86-64        | 1.0.1   | <sub>7a3f14927ddd3c266905211c6ae67a3799ea1e709e9b6b246d0e6e44eebe0afc</sub> |
+| [ruse-1.0.1-win-i386.zip](//github.com/e3prom/ruse/releases/download/1.0.1/ruse-1.0.1-win-i386.zip)                     | Windows (i386)             | x86-32        | 1.0.1   | <sub>706c7bace3ad7f739a845ee05278794c2477551a652df727e12dca1cc9d2e914</sub> |
+| [ruse-1.0.1-darwin-amd64.tar.gz](//github.com/e3prom/ruse/releases/download/1.0.1/ruse-1.0.1-darwin-amd64.tar.gz)       | Mac OS X                   | x86-64        | 1.0.1   | <sub>0cc864e82237614c3e7a0b06d2fa7f1580532c681d0f1f10c6abb721d72c0f80</sub> |
 
 ## Configuring
 To configure the redirector, edit and copy the [ruse.conf](conf/ruse.conf)
