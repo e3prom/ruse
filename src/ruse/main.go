@@ -28,12 +28,14 @@ import (
 
 // Global program constants.
 const (
+	VERBOSITY   = 0
 	CONFIG_FILE = "/etc/ruse.conf"
 	INDEX_FILE  = "index.htm"
 )
 
 // Global program variables.
 var (
+	verbosity  = VERBOSITY
 	configFile = CONFIG_FILE
 	indexFile  = INDEX_FILE
 	proto      = make(map[string]struct{})
@@ -88,6 +90,7 @@ type Match struct {
 
 // init function for the flag package.
 func init() {
+	flag.IntVar(&verbosity, "v", VERBOSITY, "set verbosity level")
 	flag.StringVar(&configFile, "c", CONFIG_FILE, "path to ruse configuration file")
 	flag.StringVar(&indexFile, "i", INDEX_FILE, "filename of directory index")
 }
@@ -134,7 +137,12 @@ func main() {
 	// parse configuration file.
 	initAndParseConfig(configFile, &config)
 
-	// check if the 'indexFile' command-line flag is set.
+	// check if the 'v' (verbosity) command-line flag is set.
+	if flagset["v"] {
+		config.Verbose = verbosity
+	}
+
+	// check if the 'i' (indexFile) command-line flag is set.
 	// if set, it will overwrite the config's Index string, as it takes
 	// precedence over the configuration and their default values.
 	if flagset["i"] {
@@ -336,7 +344,7 @@ func performProxying(w http.ResponseWriter, r *http.Request, t string) {
 // of the Config structure and the parsing of the JSON formatted configuration
 // file.
 func initAndParseConfig(cf string, config *Config) {
-	// Set default values for the mandatory members of the Config structure.
+	// Set default values for the important members of the Config structure.
 	config.Hostname = "localhost"
 	config.Port = 8000
 	config.TLSPort = 443
