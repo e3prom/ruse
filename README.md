@@ -104,8 +104,8 @@ receives the SIGHUP signal.
 The configuration file is in JSON format, and accepts various configuration
 options, please see the tables below for further reference:
 
-### Configuration file - main attributes
-| Attribute Name | Type     | Default value(s) | Supported value(s) / Description        |
+### Configuration file - Primary Keys
+| Key Name       | Type     | Default value(s) | Supported value(s) / Description        |
 |----------------|----------|------------------|-----------------------------------------|
 | Hostname       | optional | localhost        | valid hostname or IPv4/IPv6 address[¹]  |
 | Protocols      | optional | plain            | plain, tls                              |
@@ -113,11 +113,11 @@ options, please see the tables below for further reference:
 | TLSPort        | optional | 8443             | 0-65535                                 |
 | TLSKey         | optional | server.key       | a valid PEM encoded private key file    |
 | TLSCert        | optional | server.crt       | a valid X.509 certificate chain file    |
-| Root           | optional | /var/www         | static content root directory           |
+| Root           | optional | /var/www         | root directory for static content       |
 | Index          | optional |                  | directory index file[²]                 |
 | Verbose        | optional | 0                | 0(off), 1(low), 2(medium), 3(high)      |
 | Logfile        | optional |                  | readable and writable log file          |
-| Proxy          | optional | msf default      | see Proxy sub-attributes table          |
+| Proxy          | optional |                  | see Proxy array's keys table below      |
 
 #### ¹ IP Addresses
 [¹]:#-ip-addresses
@@ -131,20 +131,20 @@ Use an empty `""` value as the index page to enable recursive directory
 listing.
 
 ----
-### Configuration file - Proxy sub-attributes
-| Sub-attribute Name | Type     | Default value(s) | Supported value(s) / Description        |
+### Configuration file - Proxy Array's Keys
+| Key Name           | Type     | Default value(s) | Supported value(s) / Description        |
 |--------------------|----------|------------------|-----------------------------------------|
-| Type               | optional |                  | reverse                                 |
+| Type               | optional |                  | only 'reverse' is actually supported    |
 | Description        | optional |                  | administrative description of the proxy |
-| Match              | required |                  | see Match sub-attribute table           |
-| Target             | required |                  | valid http:// or https:// scheme URI    |
+| Match              | required |                  | see Match object's keys table below     |
+| Target             | required |                  | valid http:// or https:// schemes URI   |
 
 ----
-### Configuration file - Match sub-attributes
-| Sub-attribute Name | Type     | Default value(s) | Supported value(s) / Description                             |
+### Configuration file - Match Object's Keys
+| Key Name           | Type     | Default value(s) | Supported value(s) / Description                             |
 |--------------------|----------|------------------|--------------------------------------------------------------|
-| UserAgent          | optional |                  | an array of valid User-Agent string or Regular Expression[¹] |
-| Network            | optional |                  | an array of network(s) in CIDR notation[²]                   |
+| UserAgent          | optional |                  | an array of User-Agent string(s) or Regular Expression(s)[¹] |
+| Network            | optional |                  | an array or list of network(s) in CIDR notation[²]           |
 
 #### ¹ Regular Expression Matching
 [¹]:#-regular-expression-matching

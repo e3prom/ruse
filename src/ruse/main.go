@@ -29,11 +29,15 @@ import (
 // Global program constants.
 const (
 	CONFIG_FILE = "/etc/ruse.conf"
+	INDEX_FILE  = "index.htm"
 )
 
 // Global program variables.
-var configFile = CONFIG_FILE
-var proto = make(map[string]struct{})
+var (
+	configFile = CONFIG_FILE
+	indexFile  = INDEX_FILE
+	proto      = make(map[string]struct{})
+)
 
 // Configuration File Structure.
 type Config struct {
@@ -84,7 +88,8 @@ type Match struct {
 
 // init function for the flag package.
 func init() {
-	flag.StringVar(&configFile, "c", CONFIG_FILE, "configuration file")
+	flag.StringVar(&configFile, "c", CONFIG_FILE, "path to ruse configuration file")
+	flag.StringVar(&indexFile, "i", INDEX_FILE, "filename of directory index")
 }
 
 // SIGHUP handler function.
@@ -106,6 +111,11 @@ func main() {
 	// parse command-line parameters.
 	flag.Parse()
 
+	// Uses flag.Visit to visit flags, calling the passed function for each.
+	// The latter will sets the *actual* flags inside the 'flagset' map.
+	flagset := make(map[string]bool)
+	flag.Visit(func(f *flag.Flag) { flagset[f.Name] = true })
+
 	// declare and initialize configuration structure.
 	config := Config{}
 
@@ -123,6 +133,16 @@ func main() {
 
 	// parse configuration file.
 	initAndParseConfig(configFile, &config)
+
+	// check if the 'indexFile' command-line flag is set.
+	// if set, it will overwrite the config's Index string, as it takes
+	// precedence over the configuration and their default values.
+	if flagset["i"] {
+		config.Index = indexFile
+		if config.Verbose > 1 {
+			log.Printf("warning: Directory Index is set to %v\n", config.Index)
+		}
+	}
 
 	// compile hard-coded directory regexp once.
 	reDir := regexp.MustCompile(".*/$")
@@ -316,7 +336,7 @@ func performProxying(w http.ResponseWriter, r *http.Request, t string) {
 // of the Config structure and the parsing of the JSON formatted configuration
 // file.
 func initAndParseConfig(cf string, config *Config) {
-	// Set default values for the important members of the Config structure.
+	// Set default values for the mandatory members of the Config structure.
 	config.Hostname = "localhost"
 	config.Port = 8000
 	config.TLSPort = 443
@@ -324,6 +344,7 @@ func initAndParseConfig(cf string, config *Config) {
 	config.TLSCert = "server.crt"
 	config.Protocols = []string{"plain"}
 	config.Root = "/var/www"
+	config.Index = ""
 	config.LogFile = ""
 
 	f, err := os.Open(cf)
