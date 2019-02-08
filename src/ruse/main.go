@@ -71,6 +71,8 @@ type Config struct {
 	LogFile string
 	// Proxy settings.
 	Proxy []Proxy
+	// VirtualHost
+	VirtualHost []VirtualHost
 }
 
 // Proxy struct definition
@@ -86,6 +88,19 @@ type Match struct {
 	Network      []string
 	_userAgent   []string
 	_reUserAgent []*regexp.Regexp
+}
+
+// VirtualHost struct definition
+type VirtualHost struct {
+	Hostname string
+	Root     string
+	Index    string
+	Proxy    []Proxy
+}
+
+// ProxyClient struct definition
+type ProxyClient struct {
+	Proxy *[]Proxy
 }
 
 // init function for the flag package.
@@ -208,7 +223,7 @@ func main() {
 
 // checkToProxy simply checks if the incoming request's user-agent matches any
 // of the configured proxy matching criterias. If it does, it returns true.
-func checkToProxy(w http.ResponseWriter, r *http.Request, config *Config) bool {
+func checkToProxy(w http.ResponseWriter, r *http.Request, proxyClient *ProxyClient) bool {
 	// declare and initialize isMatchedNetwork and isMatchUserAgent to false.
 	var isMatchedNetwork bool = false
 	var isMatchedUserAgent bool = false
@@ -217,7 +232,7 @@ func checkToProxy(w http.ResponseWriter, r *http.Request, config *Config) bool {
 	clientAddr := strings.Split(r.RemoteAddr, ":")
 
 	// For every Proxy definition:
-	for _, p := range config.Proxy {
+	for _, p := range *proxyClient.Proxy {
 		// for every CIDR networks specified as matching criteria, call
 		// isAddrInNetwork() with the client IP address. If it returns True
 		// then set the 'isMatchedNetwork' to True as well.
@@ -285,7 +300,7 @@ func isAddrInNetwork(cAddr string, cNet string) bool {
 // getContentWithConfig wrapper function used to get pointer to the
 // configuration's structure. It wraps the HTTP handler function which serves
 // files recursively from the web root directory and the request's URL path as
-// retured by the sanitizePath() function.
+// returned by processPath().
 func getContentWithConfig(config *Config, re *regexp.Regexp) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		processPath := func(p string) string {
@@ -296,9 +311,25 @@ func getContentWithConfig(config *Config, re *regexp.Regexp) http.HandlerFunc {
 			}
 			return path.Clean(p)
 		}
+
+		// initialize proxyClient structure with the Proxy pointer pointing to
+		// the global Proxy structure.
+		proxyClient := ProxyClient{&config.Proxy}
+
+		// inspect the Host header field if it matches the server's hostname
+		// If it does not, then update 'proxyClient' *Proxy to point to the
+		// appropriate VirtualHost's configuration.
+		if strings.Split(r.Host, ":")[0] != config.Hostname {
+			for _, vhost := range config.VirtualHost {
+				if r.Host == vhost.Hostname {
+					proxyClient = ProxyClient{&vhost.Proxy}
+				}
+			}
+		}
+
 		// call checkToProxy() to determine if the requests need to be proxied.
 		// if not serve files and call processPath to sanitize the url path.
-		if !checkToProxy(w, r, config) {
+		if !checkToProxy(w, r, &proxyClient) {
 			// print client requests to log
 			if config.Verbose > 1 {
 				log.Printf("static: %s - \"%s %s %s\" - \"%s\"\n", r.RemoteAddr,
@@ -378,27 +409,39 @@ func initAndParseConfig(cf string, config *Config) {
 		proto[s] = struct{}{}
 	}
 
+	// call compileUserAgentRE() to compile User-Agent Regular Expression.
+	compileUserAgentRE(&config.Proxy)
+	if len(config.VirtualHost) > 0 {
+		for _, vhost := range config.VirtualHost {
+			compileUserAgentRE(&vhost.Proxy)
+		}
+	}
+}
+
+// compileUserAgentRE processes UserAgent values for every Match keys present
+// in the Proxy list passed as a reference in argument to the function call.
+func compileUserAgentRE(proxy *[]Proxy) {
 	// if regular expressions are used inside the values of the User-Agent
 	// sub-attributes of the Proxy's Match attribute. Then compile the
 	// configured regexp once and place their respective pointers inside a
-	// slice of pointers. Here the index is used to append values to the Config
-	// structure and not to the local copy of the for loop.
-	for i, p := range config.Proxy {
+	// slice of pointers. Here the index is used to append values to the Proxy
+	// structure and not to the local copy of it inside the for loop.
+	for i, p := range *proxy {
 		// overwrite 'internal' below Config struct members to avoid security
 		// issues with possibly untrusted pointers and precompiled regexp
 		// passed as input from the configuration file.
-		config.Proxy[i].Match._reUserAgent = []*regexp.Regexp{}
-		config.Proxy[i].Match._userAgent = []string{""}
+		(*proxy)[i].Match._reUserAgent = []*regexp.Regexp{}
+		(*proxy)[i].Match._userAgent = []string{""}
 		for _, ua := range p.Match.UserAgent {
 			if (len(ua) > 0) && (ua[0] == 0x7E) {
 				rePtr, err := regexp.Compile(ua[1:])
 				if err == nil {
-					config.Proxy[i].Match._reUserAgent =
-						append(config.Proxy[i].Match._reUserAgent, rePtr)
+					(*proxy)[i].Match._reUserAgent =
+						append((*proxy)[i].Match._reUserAgent, rePtr)
 				}
 			} else {
-				config.Proxy[i].Match._userAgent =
-					append(config.Proxy[i].Match._userAgent, ua)
+				(*proxy)[i].Match._userAgent =
+					append((*proxy)[i].Match._userAgent, ua)
 			}
 		}
 	}
