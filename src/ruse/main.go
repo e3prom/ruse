@@ -303,11 +303,11 @@ func isAddrInNetwork(cAddr string, cNet string) bool {
 // returned by processPath().
 func getContentWithConfig(config *Config, re *regexp.Regexp) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		processPath := func(p string) string {
+		processPath := func(p string, idx string) string {
 			// regexp for directories in the path string 'p'.
 			if re.MatchString(p) {
 				// serve index file instead of the default directory listing.
-				p = p + config.Index
+				p = p + idx
 			}
 			return path.Clean(p)
 		}
@@ -315,14 +315,22 @@ func getContentWithConfig(config *Config, re *regexp.Regexp) http.HandlerFunc {
 		// initialize proxyClient structure with the Proxy pointer pointing to
 		// the global Proxy structure.
 		proxyClient := ProxyClient{&config.Proxy}
+		// initialize fileRoot to the value of the global 'Root' key.
+		fileRoot := config.Root
+		// initialize dirIndex to the global directory index.
+		dirIndex := config.Index
 
 		// inspect the Host header field if it matches the server's hostname
 		// If it does not, then update 'proxyClient' *Proxy to point to the
-		// appropriate VirtualHost's configuration.
+		// appropriate VirtualHost's configuration. Also update the static file
+		// root directory and the directory index to the VirtualHost specific
+		// configuration.
 		if strings.Split(r.Host, ":")[0] != config.Hostname {
 			for _, vhost := range config.VirtualHost {
 				if r.Host == vhost.Hostname {
 					proxyClient = ProxyClient{&vhost.Proxy}
+					fileRoot = vhost.Root
+					dirIndex = vhost.Index
 				}
 			}
 		}
@@ -335,8 +343,8 @@ func getContentWithConfig(config *Config, re *regexp.Regexp) http.HandlerFunc {
 				log.Printf("static: %s - \"%s %s %s\" - \"%s\"\n", r.RemoteAddr,
 					r.Method, r.URL, r.Proto, r.UserAgent())
 			}
-			http.ServeFile(w, r, filepath.Join(config.Root,
-				processPath(r.URL.Path)))
+			http.ServeFile(w, r, filepath.Join(fileRoot,
+				processPath(r.URL.Path, dirIndex)))
 		}
 	}
 }
