@@ -103,6 +103,30 @@ type ProxyClient struct {
 	Proxy *[]Proxy
 }
 
+// httpWriter struct definition
+type httpWriter struct {
+	http.ResponseWriter
+	status  int
+	length  int
+	proxied bool
+}
+
+// WriteHeader() interface method for http.ResponseWriter
+func (w *httpWriter) WriteHeader(status int) {
+	w.status = status
+	w.ResponseWriter.WriteHeader(status)
+}
+
+// Write() interface method for http.ResponseWriter
+func (w *httpWriter) Write(b []byte) (int, error) {
+	if w.status == 0 {
+		w.status = 200
+	}
+	n, err := w.ResponseWriter.Write(b)
+	w.length += n
+	return n, err
+}
+
 // init function for the flag package.
 func init() {
 	flag.IntVar(&verbosity, "v", VERBOSITY, "set verbosity level")
@@ -312,6 +336,9 @@ func getContentWithConfig(config *Config, re *regexp.Regexp) http.HandlerFunc {
 			return path.Clean(p)
 		}
 
+		// initializing new ResponseWriter httpWriter as 'hw'
+		hw := httpWriter{ResponseWriter: w}
+
 		// initialize proxyClient structure with the Proxy pointer pointing to
 		// the global Proxy structure.
 		proxyClient := ProxyClient{&config.Proxy}
@@ -337,15 +364,28 @@ func getContentWithConfig(config *Config, re *regexp.Regexp) http.HandlerFunc {
 
 		// call checkToProxy() to determine if the requests need to be proxied.
 		// if not serve files and call processPath to sanitize the url path.
-		if !checkToProxy(w, r, &proxyClient) {
-			// print client requests to log
-			if config.Verbose > 1 {
-				log.Printf("static: %s - \"%s %s %s\" - \"%s\"\n", r.RemoteAddr,
-					r.Method, r.URL, r.Proto, r.UserAgent())
-			}
-			http.ServeFile(w, r, filepath.Join(fileRoot,
+		if !checkToProxy(&hw, r, &proxyClient) {
+			http.ServeFile(&hw, r, filepath.Join(fileRoot,
 				processPath(r.URL.Path, dirIndex)))
+		} else {
+			// if the request has been proxied, set 'proxied' to true in the
+			// httpWriter structure.
+			hw.proxied = true
 		}
+
+		// HTTP Logging
+		if config.Verbose > 1 {
+			if hw.proxied {
+				log.Printf("[proxy]:  %s - \"%s %s %s\" %d %d - \"%s\"\n",
+					r.RemoteAddr, r.Method, r.URL, r.Proto, hw.status,
+					hw.length, r.UserAgent())
+			} else {
+				log.Printf("[static]: %s - \"%s %s %s\" %d %d - \"%s\"\n",
+					r.RemoteAddr, r.Method, r.URL, r.Proto, hw.status,
+					hw.length, r.UserAgent())
+			}
+		}
+
 	}
 }
 
