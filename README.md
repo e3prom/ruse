@@ -16,16 +16,17 @@ or inside a Docker container for even more security.
 ## Features
  * Runs under Linux, \*BSD, Mac OS X, and Windows (7, Server 2008R2 and later)
  * Supports Intel x86, AMD64, ARM, ARM64 and PPC64 (little-endian)
- * No external dependencies
+ * No external dependencies (only uses the Go standard library)
  * HTTP and HTTPS (SSL/TLS) support
  * Support IPv4 and IPv6 addressing
  * Selective Reverse Proxying based on:
    * User-Agent header field, matching:
      * Exact String(s)
      * Regular Expression(s)
-   * CIDR network(s)
+   * Client's network (CIDR format)
+ * Support for VirtualHost
  * Serves static files (with optional directory listing)
- * File Logging
+ * HTTP Logging
  
 ## Use-cases
 Ruse helps you overcome multiple challenges, such as:
@@ -118,6 +119,7 @@ options, please see the tables below for further reference:
 | Verbose        | optional | 0                | 0(off), 1(low), 2(medium), 3(high)      |
 | Logfile        | optional |                  | readable and writable log file          |
 | Proxy          | optional |                  | see Proxy array's keys table below      |
+| VirtualHost    | optional |                  | see VirtualHost array's keys table      |
 
 #### ¹ IP Addresses
 [¹]:#-ip-addresses
@@ -143,18 +145,27 @@ listing.
 ### Configuration file - Match Object's Keys
 | Key Name           | Type     | Default value(s) | Supported value(s) / Description                             |
 |--------------------|----------|------------------|--------------------------------------------------------------|
-| UserAgent          | optional |                  | an array of User-Agent string(s) or Regular Expression(s)[¹] |
-| Network            | optional |                  | an array or list of network(s) in CIDR notation[²]           |
+| UserAgent          | optional |                  | an array of User-Agent string(s) or Regular Expression(s)[³] |
+| Network            | optional |                  | an array or list of network(s) in CIDR notation[⁴]           |
 
-#### ¹ Regular Expression Matching
-[¹]:#-regular-expression-matching
+### Configuration file - VirtualHost Array's Keys
+| Key Name       | Type     | Default value(s) | Supported value(s) / Description        |
+|----------------|----------|------------------|-----------------------------------------|
+| Hostname       | optional | localhost        | valid hostname or IPv4/IPv6 address[¹]  |
+| Root           | optional |                  | root directory for static content       |
+| Index          | optional |                  | directory index file[²]                 |
+| Proxy          | optional |                  | see Proxy array's keys table above      |
+
+
+#### ³ Regular Expression Matching
+[³]:#-regular-expression-matching
 You can leverage [Regular
 Expressions](https://en.wikipedia.org/wiki/Regular_expression) for matching
 HTTP User-Agent header field's values. Use the special tilde `~` character
 followed by a valid regular expression.
 
-#### ² CIDR Invert Matching
-[²]:#-cidr-invert-matching
+#### ⁴ CIDR Invert Matching
+[⁴]:#-cidr-invert-matching
 You can negate CIDR networks matching using the exclamation mark `!` character.
 
 ## Contributing
