@@ -30,6 +30,7 @@ import (
 const (
 	VERBOSITY   = 0
 	CONFIG_FILE = "/etc/ruse.conf"
+	LOG_FILE    = ""
 	INDEX_FILE  = "index.htm"
 )
 
@@ -37,6 +38,7 @@ const (
 var (
 	verbosity  = VERBOSITY
 	configFile = CONFIG_FILE
+	logFile    = LOG_FILE
 	indexFile  = INDEX_FILE
 	proto      = make(map[string]struct{})
 )
@@ -131,6 +133,7 @@ func (w *httpWriter) Write(b []byte) (int, error) {
 func init() {
 	flag.IntVar(&verbosity, "v", VERBOSITY, "set verbosity level")
 	flag.StringVar(&configFile, "c", CONFIG_FILE, "path to ruse configuration file")
+	flag.StringVar(&logFile, "l", LOG_FILE, "path to the log file")
 	flag.StringVar(&indexFile, "i", INDEX_FILE, "filename of directory index")
 }
 
@@ -176,6 +179,23 @@ func main() {
 	// parse configuration file.
 	initAndParseConfig(configFile, &config)
 
+	// trigger file logging.
+	if flagset["l"] {
+		config.LogFile = logFile
+		config.Verbose = 2
+	}
+	if config.LogFile != "" {
+		f, err := os.OpenFile(config.LogFile,
+			os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
+		if err != nil {
+			log.Fatalf("error opening log file: %s", err)
+		}
+		defer f.Close()
+
+		log.SetOutput(f)
+		log.Println("file logging started")
+	}
+
 	// check if the 'v' (verbosity) command-line flag is set.
 	if flagset["v"] {
 		config.Verbose = verbosity
@@ -196,19 +216,6 @@ func main() {
 
 	// register call back function for handling HTTP traffic.
 	http.HandleFunc("/", getContentWithConfig(&config, reDir))
-
-	// trigger file logging.
-	if config.LogFile != "" {
-		f, err := os.OpenFile(config.LogFile,
-			os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
-		if err != nil {
-			log.Fatalf("error opening log file: %s", err)
-		}
-		defer f.Close()
-
-		log.SetOutput(f)
-		log.Println("file logging started")
-	}
 
 	// check if plain-text HTTP is enabled.
 	if _, present := proto["plain"]; present {
