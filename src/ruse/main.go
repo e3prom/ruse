@@ -171,7 +171,7 @@ func main() {
 	go func() {
 		for {
 			s := <-handleSIGHUP()
-			log.Printf("signal: got %s signal, reloading configuration file...", s)
+			log.Printf("[signal]: got %s signal, reloading configuration file...", s)
 			initAndParseConfig(configFile, &config)
 		}
 	}()

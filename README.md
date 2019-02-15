@@ -31,13 +31,14 @@ or inside a Docker container for added security.
  * HTTP Logging
  
 ## Use-cases
-Ruse helps you overcome multiple challenges, such as:
- * Hiding your HTTP listener(s) from Incident Response teams.
+Ruse help you overcome multiple challenges, such as:
+ * Hiding your HTTP listeners from Incident Response teams.
  * Load-balancing to multiple remote listeners.
  * Simultaneously serving static files and listening for reverse HTTP shellcodes on a single port.
- * Leveraging domain-fronting by exposing the redirector from a trusted location.
- * Pivoting post-exploitation by proxying reverse HTTP(S) shellcodes.
- * Quickly [proxy your Metasploit's reverse_http(s) payloads](docs/msf-reverse-https.md).
+ * Leveraging domain-fronting by exposing the redirector from a trusted location or domain.
+ * Pivoting traffic post-exploitation by proxying reverse HTTP shellcodes.
+ * Easily [proxy your Metasploit's reverse_http(s) payloads](docs/msf-reverse-https.md).
+ * Selectively [proxy your reverse shellcodes traffic with vhosts and regex matching](docs/virtualhost-with-regex.md).
 
 If you're doing Red Team operations or you may simply want to hide your HTTP
 listeners during an engagement, Ruse may be for you!
@@ -67,7 +68,7 @@ Starting HTTP Server on localhost:8000
 By default Ruse ships with a [basic configuration file](conf/ruse.conf)
 which only allows plain-text HTTP connections from localhost on port tcp/8000.
 It's also configured to proxy traffic from metasploit's reverse HTTP payloads
-by exact matching their User-Agent header fields.
+by exact matching their default User-Agent header fields.
 
 ## Building and running under Docker
 Ruse can also run under a Docker container, and thus in a matter of seconds.
@@ -77,12 +78,12 @@ container like demonstrated in the below example:
 ```
 $ make container
 [...]
-$ docker run -v `pwd`/conf/ruse.conf:/etc/ruse.conf -p 127.0.0.1:8000:8000/tcp registry/ruse-amd64:59ea848-dirty
+$ docker run -v `pwd`/conf/ruse.conf:/etc/ruse.conf -p 127.0.0.1:8000:8000/tcp registry/ruse-amd64:1.0.2
 Starting HTTP Server on localhost:8000
 ```
 
 ## Binaries
-If you do not want to build Ruse from source, you can directly download the binaries below. Only binaries for production releases and major operating systems and architectures are available.
+If you do not want to build Ruse from source, you can directly download the binaries below:
 
 ### Releases
 | Filename                                                                                                                | OS                         | Architecture  | Version | SHA256 Checksum                                                             |
