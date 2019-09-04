@@ -86,12 +86,13 @@ Starting HTTP Server on localhost:8000
 If you do not want to build Ruse from source, you can directly download the binaries below:
 
 ### Releases
-| Filename                                                                                                                | OS                         | Architecture  | Version | SHA256 Checksum                                                             |
-|-------------------------------------------------------------------------------------------------------------------------|----------------------------|---------------|---------|-----------------------------------------------------------------------------|
-| [ruse-1.0.2-linux-debian-amd64.deb](//github.com/e3prom/ruse/releases/download/1.0.2/ruse-1.0.2-linux-debian-amd64.deb) | Linux Debian (derivatives) | x86-64        | 1.0.2   | <sub>63b0f3fff7dd0bfa506b2623d1690d3fe9fc69ec15737a235f0c8712764a4c39</sub> |
-| [ruse-1.0.2-win-amd64.zip](//github.com/e3prom/ruse/releases/download/1.0.2/ruse-1.0.2-win-amd64.zip)                   | Windows (amd64)            | x86-64        | 1.0.2   | <sub>0615349405a47c59984827cf4d8e60480df274d25f430db70e8c2c1c0fb7dbb5</sub> |
-| [ruse-1.0.2-win-i386.zip](//github.com/e3prom/ruse/releases/download/1.0.2/ruse-1.0.2-win-i386.zip)                     | Windows (i386)             | x86-32        | 1.0.2   | <sub>e34566725a0a31b37e9d66a84123f2b667185fb3862d1db4208a35feed6f0ba9</sub> |
-| [ruse-1.0.2-darwin-amd64.zip](//github.com/e3prom/ruse/releases/download/1.0.2/ruse-1.0.2-darwin-amd64.zip)             | Mac OS X                   | x86-64        | 1.0.2   | <sub>52e9804a413db8dca6470bcd13f55dd683e1559aa32c89107b892d98457c4ab3</sub> |
+| Filename                                                                                                                | OS                         | Architecture | Version | SHA256 Checksum                                                             |
+| ----------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------ | ------- | --------------------------------------------------------------------------- |
+| [ruse-1.0.2-linux-debian-amd64.deb](//github.com/e3prom/ruse/releases/download/1.0.2/ruse-1.0.2-linux-debian-amd64.deb) | Linux Debian (derivatives) | x86-64       | 1.0.2   | <sub>63b0f3fff7dd0bfa506b2623d1690d3fe9fc69ec15737a235f0c8712764a4c39</sub> |
+| [ruse-1.0.2-linux-aarch64.tar.xz](//github.com/e3prom/ruse/download/1.0.2/ruse-1.0.2-linux-aarch64.tar.xz)              | Linux (Generic)            | AArch64      | 1.0.2   | <sub>0ae13d43fc1279afb330116d4f16e894907f445413617823464df06d52ef45ad</sub> |
+| [ruse-1.0.2-win-amd64.zip](//github.com/e3prom/ruse/releases/download/1.0.2/ruse-1.0.2-win-amd64.zip)                   | Windows (amd64)            | x86-64       | 1.0.2   | <sub>0615349405a47c59984827cf4d8e60480df274d25f430db70e8c2c1c0fb7dbb5</sub> |
+| [ruse-1.0.2-win-i386.zip](//github.com/e3prom/ruse/releases/download/1.0.2/ruse-1.0.2-win-i386.zip)                     | Windows (i386)             | x86-32       | 1.0.2   | <sub>e34566725a0a31b37e9d66a84123f2b667185fb3862d1db4208a35feed6f0ba9</sub> |
+| [ruse-1.0.2-darwin-amd64.zip](//github.com/e3prom/ruse/releases/download/1.0.2/ruse-1.0.2-darwin-amd64.zip)             | Mac OS X                   | x86-64       | 1.0.2   | <sub>52e9804a413db8dca6470bcd13f55dd683e1559aa32c89107b892d98457c4ab3</sub> |
 
 ## Configuring
 To configure the redirector, edit and copy the [ruse.conf](conf/ruse.conf)
@@ -104,20 +105,20 @@ The configuration file is in JSON format, and accepts various configuration
 options, please see the tables below for further reference:
 
 ### Configuration file - Primary Keys
-| Key Name       | Type     | Default value(s) | Supported value(s) / Description        |
-|----------------|----------|------------------|-----------------------------------------|
-| Hostname       | optional | localhost        | valid hostname or IPv4/IPv6 address[¹]  |
-| Protocols      | optional | plain            | plain, tls                              |
-| Port           | optional | 8000             | 0-65535                                 |
-| TLSPort        | optional | 8443             | 0-65535                                 |
-| TLSKey         | optional | server.key       | a valid PEM encoded private key file    |
-| TLSCert        | optional | server.crt       | a valid X.509 certificate chain file    |
-| Root           | optional | /var/www         | root directory for static content       |
-| Index          | optional |                  | directory index file[²]                 |
-| Verbose        | optional | 0                | 0(off), 1(low), 2(medium), 3(high)      |
-| Logfile        | optional |                  | readable and writable log file          |
-| Proxy          | optional |                  | see Proxy array's keys table below      |
-| VirtualHost    | optional |                  | see VirtualHost array's keys table      |
+| Key Name    | Type     | Default value(s) | Supported value(s) / Description       |
+| ----------- | -------- | ---------------- | -------------------------------------- |
+| Hostname    | optional | localhost        | valid hostname or IPv4/IPv6 address[¹] |
+| Protocols   | optional | plain            | plain, tls                             |
+| Port        | optional | 8000             | 0-65535                                |
+| TLSPort     | optional | 8443             | 0-65535                                |
+| TLSKey      | optional | server.key       | a valid PEM encoded private key file   |
+| TLSCert     | optional | server.crt       | a valid X.509 certificate chain file   |
+| Root        | optional | /var/www         | root directory for static content      |
+| Index       | optional |                  | directory index file[²]                |
+| Verbose     | optional | 0                | 0(off), 1(low), 2(medium), 3(high)     |
+| Logfile     | optional |                  | readable and writable log file         |
+| Proxy       | optional |                  | see Proxy array's keys table below     |
+| VirtualHost | optional |                  | see VirtualHost array's keys table     |
 
 #### ¹ IP Addresses
 [¹]:#-ip-addresses
@@ -132,27 +133,27 @@ listing.
 
 ----
 ### Configuration file - Proxy Array's Keys
-| Key Name           | Type     | Default value(s) | Supported value(s) / Description        |
-|--------------------|----------|------------------|-----------------------------------------|
-| Type               | optional |                  | only 'reverse' is actually supported    |
-| Description        | optional |                  | administrative description of the proxy |
-| Match              | required |                  | see Match object's keys table below     |
-| Target             | required |                  | valid http:// or https:// schemes URI   |
+| Key Name    | Type     | Default value(s) | Supported value(s) / Description        |
+| ----------- | -------- | ---------------- | --------------------------------------- |
+| Type        | optional |                  | only 'reverse' is actually supported    |
+| Description | optional |                  | administrative description of the proxy |
+| Match       | required |                  | see Match object's keys table below     |
+| Target      | required |                  | valid http:// or https:// schemes URI   |
 
 ----
 ### Configuration file - Match Object's Keys
-| Key Name           | Type     | Default value(s) | Supported value(s) / Description                             |
-|--------------------|----------|------------------|--------------------------------------------------------------|
-| UserAgent          | optional |                  | an array of User-Agent string(s) or Regular Expression(s)[³] |
-| Network            | optional |                  | an array or list of network(s) in CIDR notation[⁴]           |
+| Key Name  | Type     | Default value(s) | Supported value(s) / Description                             |
+| --------- | -------- | ---------------- | ------------------------------------------------------------ |
+| UserAgent | optional |                  | an array of User-Agent string(s) or Regular Expression(s)[³] |
+| Network   | optional |                  | an array or list of network(s) in CIDR notation[⁴]           |
 
 ### Configuration file - VirtualHost Array's Keys
-| Key Name       | Type     | Default value(s) | Supported value(s) / Description        |
-|----------------|----------|------------------|-----------------------------------------|
-| Hostname       | optional | localhost        | valid hostname or IPv4/IPv6 address[¹]  |
-| Root           | optional |                  | root directory for static content       |
-| Index          | optional |                  | directory index file[²]                 |
-| Proxy          | optional |                  | see Proxy array's keys table above      |
+| Key Name | Type     | Default value(s) | Supported value(s) / Description       |
+| -------- | -------- | ---------------- | -------------------------------------- |
+| Hostname | optional | localhost        | valid hostname or IPv4/IPv6 address[¹] |
+| Root     | optional |                  | root directory for static content      |
+| Index    | optional |                  | directory index file[²]                |
+| Proxy    | optional |                  | see Proxy array's keys table above     |
 
 
 #### ³ Regular Expression Matching

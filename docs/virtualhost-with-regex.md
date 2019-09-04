@@ -77,7 +77,7 @@ website back. It may tricks a few users, that may want to know what is
 originating from a particular pair of IP address and port. Requests with an
 empty User-Agent header field won't be proxy-ed, and the `index.htm` page
 residing in `/var/www` will be displayed if it does exist, otherwise it will
-return a 404 error code and an corresponding error message.
+return a 404 error code and a corresponding error message.
 
 #### hax0r.root vhost
 We then defined a `VirtualHost` array/list using the key of the same name. We
@@ -87,7 +87,7 @@ associated with this VirtualHost configuration.
 
 We've configured this vhost, so that all traffic originating from our HTTP
 reverse shellcodes will be matched according to their User-Agent header fields
-and their source IP address. We know that our victims resides in the
+and their source IPv4 address. We know that our victims resides in the
 `62.14.22.0/24` network and therefore, we only want traffic from this specific
 network to be proxied to `https://10.0.1.122:443`, our payload listener.
 
